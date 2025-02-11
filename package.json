@@ -12,15 +12,13 @@
     "dev": "nodemon server.js",
     "build": "echo 'No build step required'",
     "test": "jest --coverage",
-    "lint": "eslint . --fix",
-    "prepare": "npm install"
+    "lint": "eslint . --fix"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "proxy": "http://localhost:5000",
   "dependencies": {
-    "@ngrok/ngrok": "^1.4.1",
     "@paystack/inline-js": "^2.22.1",
     "axios": "^1.7.9",
     "bcrypt": "^5.1.0",
@@ -30,9 +28,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.21.2",
-    "flutterwave-node-v3": "^1.1.14",
     "formidable": "^3.5.2",
-    "glob": "^11.0.1",
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.0",
     "moment": "^2.29.4",
@@ -41,13 +37,8 @@
     "nodemailer": "^6.9.16",
     "paystack": "^2.0.1",
     "paystack-sdk": "^2.5.17",
-    "request": "^2.88.2",
     "rimraf": "^6.0.1",
     "socket.io": "^4.6.1",
-    "stripe": "^17.6.0",
-    "uuid": "^11.0.5"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.9"
+    "stripe": "^17.6.0"
   }
 }

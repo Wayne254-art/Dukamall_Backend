@@ -52,15 +52,12 @@ class bannerController {
 
         try {
             const banners = await bannerModel.aggregate([
-                {
-                    $sample: {
-                        size: 10
-                    }
-                }
+                { $match: {} },
+                { $sample: { size: 10 } }
             ])
             responseReturn(res, 200, { banners })
         } catch (error) {
-            // console.log(error)
+            console.log(error)
             responseReturn(res, 500, { message: error.message })
         }
     }
