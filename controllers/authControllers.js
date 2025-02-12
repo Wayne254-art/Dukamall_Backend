@@ -24,7 +24,7 @@ class authControllers {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'None',
-                        domain: "https://dashboard.dukamall.co.ke",
+                        domain: "dashboard.dukamall.co.ke",
                         path: "/",
                         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                     })
@@ -55,7 +55,7 @@ class authControllers {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'None',
-                        domain: "https://dashboard.dukamall.co.ke",
+                        domain: "dashboard.dukamall.co.ke",
                         path: "/",
                         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                     })
@@ -94,7 +94,7 @@ class authControllers {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     sameSite: 'None',
-                    domain: "https://dashboard.dukamall.co.ke",
+                    domain: "dashboard.dukamall.co.ke",
                     path: "/",
                     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 })
@@ -198,7 +198,7 @@ class authControllers {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'None',
-                domain: "https://dashboard.dukamall.co.ke",
+                domain: "dashboard.dukamall.co.ke",
                 path: "/",
                 expires: new Date(Date.now()),
             })
