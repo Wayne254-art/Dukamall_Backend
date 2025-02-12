@@ -30,7 +30,8 @@ class customerAuthController {
                 })
                 res.cookie('customerToken', token, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
+                    // secure: process.env.NODE_ENV === 'production',
+                    secure: true,
                     sameSite: 'None',
                     path: '/',
                     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -57,7 +58,8 @@ class customerAuthController {
                     })
                     res.cookie('customerToken', token, {
                         httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production',
+                        // secure: process.env.NODE_ENV === 'production',
+                        secure: true,
                         sameSite: 'None',
                         path: '/',
                         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -77,7 +79,8 @@ class customerAuthController {
     customer_logout = async (req, res) => {
         res.cookie('customerToken', "", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            // secure: process.env.NODE_ENV === 'production',
+            secure: true,
             sameSite: 'None',
             path: '/',
             expires: new Date(Date.now())

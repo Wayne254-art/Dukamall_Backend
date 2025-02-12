@@ -22,7 +22,8 @@ class authControllers {
                     })
                     res.cookie('accessToken', token, {
                         httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production',
+                        // secure: process.env.NODE_ENV === 'production',
+                        secure: true,
                         sameSite: 'None',
                         path: '/',
                         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -90,7 +91,8 @@ class authControllers {
                 const token = await createToken({ id: seller.id, role: seller.role })
                 res.cookie('accessToken', token, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
+                    // secure: process.env.NODE_ENV === 'production',
+                    secure: true,
                     sameSite: 'None',
                     path: '/',
                     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -193,7 +195,8 @@ class authControllers {
         try {
             res.cookie('accessToken', null, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
+                secure: true,
                 sameSite: 'None',
                 path: '/',
                 expires: new Date(Date.now()),
