@@ -24,7 +24,7 @@ class authControllers {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'None',
-                        
+                        path: '/',
                         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                     })
                     responseReturn(res, 200, { token, message: 'Login successful' })
@@ -52,8 +52,9 @@ class authControllers {
                     })
                     res.cookie('accessToken', token, {
                         httpOnly: true,
-                        secure: process.env.NODE_ENV === 'production',
+                        secure: true,
                         sameSite: 'None',
+                        path: '/',
                         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                     })
                     responseReturn(res, 200, { token, message: 'Login successful' })
@@ -91,6 +92,7 @@ class authControllers {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     sameSite: 'None',
+                    path: '/',
                     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 })
                 responseReturn(res, 201, { token, message: 'registration successful' })
@@ -193,6 +195,7 @@ class authControllers {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'None',
+                path: '/',
                 expires: new Date(Date.now()),
             })
             responseReturn(res, 200, { message: 'logout successful' })
