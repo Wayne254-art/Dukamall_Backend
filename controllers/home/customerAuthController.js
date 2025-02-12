@@ -32,6 +32,7 @@ class customerAuthController {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
                     sameSite: 'None',
+                    path: '/',
                     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 })
                 responseReturn(res, 201, { message: 'Registration successful', token })
@@ -58,6 +59,7 @@ class customerAuthController {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         sameSite: 'None',
+                        path: '/',
                         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                     })
                     responseReturn(res, 201, { message: 'Login successful', token })
@@ -77,6 +79,7 @@ class customerAuthController {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'None',
+            path: '/',
             expires: new Date(Date.now())
         })
         responseReturn(res, 200, { message: 'Logout successful' })
