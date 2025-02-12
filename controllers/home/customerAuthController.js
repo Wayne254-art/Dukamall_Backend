@@ -31,7 +31,7 @@ class customerAuthController {
                 res.cookie('customerToken', token, {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'Strict',
+                    sameSite: 'None',
                     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                 })
                 responseReturn(res, 201, { message: 'Registration successful', token })
@@ -57,7 +57,7 @@ class customerAuthController {
                     res.cookie('customerToken', token, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
-                        sameSite: 'Strict',
+                        sameSite: 'None',
                         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
                     })
                     responseReturn(res, 201, { message: 'Login successful', token })
@@ -76,7 +76,7 @@ class customerAuthController {
         res.cookie('customerToken', "", {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'Strict',
+            sameSite: 'None',
             expires: new Date(Date.now())
         })
         responseReturn(res, 200, { message: 'Logout successful' })
