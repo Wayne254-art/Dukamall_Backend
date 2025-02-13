@@ -8,33 +8,59 @@ const { mongo: { ObjectId } } = require('mongoose')
 class bannerController {
 
     add_banner = async (req, res) => {
-        const form = formidable({ multiples: true })
-        form.parse(req, async (err, field, files) => {
-            const { productId } = field
-            const { image } = files
+        const form = new formidable.IncomingForm({ multiples: false, keepExtensions: true });
+
+        form.parse(req, async (err, fields, files) => {
+            if (err) {
+                return responseReturn(res, 400, { error: 'Error parsing form data' });
+            }
+
+            // console.log("Parsed fields:", fields);
+            // console.log("Parsed files:", files);
+
+            const productId = fields.productId?.[0] || fields.productId;
+            const image = files.image?.[0] || files.image; 
+
+            if (!productId || !image || !image.filepath) {
+                return responseReturn(res, 400, { error: 'Missing productId or image file' });
+            }
 
             cloudinary.config({
                 cloud_name: process.env.cloud_name,
                 api_key: process.env.api_key,
                 api_secret: process.env.api_secret,
                 secure: true
-            })
+            });
 
             try {
-                const { slug } = await productModel.findById(productId)
-                const result = await cloudinary.uploader.upload(image.filepath, { folder: 'banners' })
+                const product = await productModel.findById(productId);
+
+                if (!product) {
+                    return responseReturn(res, 404, { error: 'Product not found' });
+                }
+
+                console.log("Uploading image to Cloudinary:", image.filepath);
+
+                const result = await cloudinary.uploader.upload(image.filepath, { folder: 'banners' });
+
+                if (!result?.secure_url) {
+                    return responseReturn(res, 400, { error: 'Image upload failed' });
+                }
+
                 const banner = await bannerModel.create({
                     productId,
-                    banner: result.url,
-                    link: slug
-                })
-                responseReturn(res, 201, { banner, message: "banner added successfully" })
+                    banner: result.secure_url,
+                    link: product.slug
+                });
+
+                return responseReturn(res, 201, { banner, message: "Banner added successfully" });
+
             } catch (error) {
-                // console.log(error)
-                responseReturn(res, 500, { message: error.message })
+                console.error("Error adding banner:", error);
+                return responseReturn(res, 500, { error: 'Internal server error' });
             }
-        })
-    }
+        });
+    };
 
     get_banner = async (req, res) => {
         const { productId } = req.params
@@ -103,7 +129,7 @@ class bannerController {
     // Admin Controllers
     add_banner_image = async (req, res) => {
         const form = new formidable.IncomingForm({ multiples: false, keepExtensions: true });
-    
+
         form.parse(req, async (err, fields, files) => {
             if (err) {
                 console.error("Formidable error:", err);
@@ -112,18 +138,18 @@ class bannerController {
                     message: "Error parsing form data",
                 });
             }
-    
+
             // const { image } = files;
 
-            const image = files.image?.[0] || files.image; 
-    
+            const image = files.image?.[0] || files.image;
+
             if (!image || !image.filepath) {
                 return res.status(400).json({
                     success: false,
                     message: "No image file uploaded",
                 });
             }
-    
+
             try {
                 cloudinary.config({
                     cloud_name: process.env.cloud_name,
@@ -131,16 +157,16 @@ class bannerController {
                     api_secret: process.env.api_secret,
                     secure: true,
                 });
-    
+
                 const result = await cloudinary.uploader.upload(image.filepath, {
                     folder: 'banners',
                 });
-    
+
                 const bannerImage = await bannerModel.create({
                     // banner: result.url,
                     banner: result.secure_url,
                 });
-    
+
                 return res.status(201).json({
                     success: true,
                     data: bannerImage,
@@ -158,14 +184,14 @@ class bannerController {
 
     delete_banner = async (req, res) => {
         const { bannerId } = req.params;
-    
+
         try {
             const deletedBanner = await bannerModel.findByIdAndDelete(bannerId);
-    
+
             if (!deletedBanner) {
                 return res.status(404).json({ error: 'Banner not found' });
             }
-    
+
             res.status(200).json({ message: 'Banner deleted successfully', banner: deletedBanner });
         } catch (error) {
             console.error('Error deleting banner:', error);

@@ -157,7 +157,7 @@ class productController {
 
             const productId = fields.productId?.[0] || fields.productId;
             const oldImage = fields.oldImage?.[0] || fields.oldImage;
-            const newImage = files.newImage?.[0] || files.newImage; // Handle object/array formats
+            const newImage = files.newImage?.[0] || files.newImage;
 
             if (!productId || !oldImage || !newImage || !newImage.filepath) {
                 return responseReturn(res, 400, { error: 'Missing required fields or file' });
