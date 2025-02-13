@@ -40,13 +40,14 @@ class productController {
                     size = [];
                 }
     
-                console.log("Parsed Color:", color);
-                console.log("Parsed Size:", size);
+                // console.log("Parsed Color:", color);
+                // console.log("Parsed Size:", size);
                 let allImageUrl = [];
 
                 for (let i = 0; i < images.length; i++) {
                     const result = await cloudinary.uploader.upload(images[i].filepath, { folder: 'products' })
-                    allImageUrl = [...allImageUrl,result.secure_url]
+                    // allImageUrl = [...allImageUrl, result.url]
+                    allImageUrl.push(result.secure_url);
                 }
 
                 await productModel.create({
