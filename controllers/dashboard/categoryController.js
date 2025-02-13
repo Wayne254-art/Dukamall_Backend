@@ -13,11 +13,11 @@ class categoryController {
                 responseReturn(res, 404, { error: 'something error' })
             } else {
                 let name = fields.name?.[0] || fields.name;
-        let image = files.image?.[0] || files.image; 
+                let image = files.image?.[0] || files.image;
 
-        if (!name || !image || !image.filepath) {
-            return responseReturn(res, 400, { error: 'Category name or image file missing' });
-        }
+                if (!name || !image || !image.filepath) {
+                    return responseReturn(res, 400, { error: 'Category name or image file missing' });
+                }
 
                 name = name.trim()
                 const slug = name.split(' ').join('-')
