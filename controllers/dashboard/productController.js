@@ -48,10 +48,14 @@ class productController {
                 let size = [];
                 if (field.size) {
                     if (typeof field.size[0] === "string") {
-                        size = field.size[0] ? field.size[0].split(",").map(s => ({ value: s.trim() })) : [];
+                        size = field.size[0]
+                            ? field.size[0].split(",").map(s => ({ value: s.trim() }))
+                            : [];
                     } else if (Array.isArray(field.size)) {
                         size = field.size.map(s => ({ value: s.trim() }));
                     }
+
+                    size = size.filter(s => s.value);
                 }
 
                 // console.log("Parsed Color:", color);
