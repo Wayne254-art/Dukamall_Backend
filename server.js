@@ -18,7 +18,9 @@ const server = http.createServer(app)
 app.use(cors({
     origin: [`${process.env.FRONTEND_URL}`, `${process.env.DASHBOARD_URL}`],
     credentials: true,
-    allowedHeaders: ['Authorization', 'Content-Type']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Authorization', 'Content-Type'],
+    exposedHeaders: ['Authorization']
 }))
 
 const io = socket(server, {
