@@ -102,7 +102,7 @@ class bannerController {
 
     // Admin Controllers
     add_banner_image = async (req, res) => {
-        const form = formidable({ multiples: false, keepExtensions: true,});
+        const form = new formidable.IncomingForm({ multiples: false, keepExtensions: true });
     
         form.parse(req, async (err, fields, files) => {
             if (err) {
@@ -135,7 +135,8 @@ class bannerController {
                 });
     
                 const bannerImage = await bannerModel.create({
-                    banner: result.url,
+                    // banner: result.url,
+                    banner: result.secure_url,
                 });
     
                 return res.status(201).json({
