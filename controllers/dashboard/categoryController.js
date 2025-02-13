@@ -6,13 +6,19 @@ const formidable = require('formidable')
 class categoryController {
 
     add_category = async (req, res) => {
-        const form = formidable()
+        const form = new formidable.IncomingForm({ multiples: false, keepExtensions: true });
+
         form.parse(req, async (err, fields, files) => {
             if (err) {
                 responseReturn(res, 404, { error: 'something error' })
             } else {
-                let { name } = fields
-                let { image } = files
+                let name = fields.name?.[0] || fields.name;
+        let image = files.image?.[0] || files.image; 
+
+        if (!name || !image || !image.filepath) {
+            return responseReturn(res, 400, { error: 'Category name or image file missing' });
+        }
+
                 name = name.trim()
                 const slug = name.split(' ').join('-')
 
@@ -30,7 +36,8 @@ class categoryController {
                         const category = await categoryModel.create({
                             name,
                             slug,
-                            image: result.url
+                            // image: result.url
+                            image: result.secure_url
                         })
                         responseReturn(res, 201, { category, message: 'category added successfully' })
                     } else {
