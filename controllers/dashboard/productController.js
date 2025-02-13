@@ -46,7 +46,7 @@ class productController {
 
                 for (let i = 0; i < images.length; i++) {
                     const result = await cloudinary.uploader.upload(images[i].filepath, { folder: 'products' })
-                    allImageUrl = [...allImageUrl, result.url]
+                    allImageUrl = [...allImageUrl,result.secure_url]
                 }
 
                 await productModel.create({
