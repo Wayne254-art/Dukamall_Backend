@@ -113,9 +113,11 @@ class bannerController {
                 });
             }
     
-            const { image } = files;
+            // const { image } = files;
+
+            const image = files.image?.[0] || files.image; 
     
-            if (!image) {
+            if (!image || !image.filepath) {
                 return res.status(400).json({
                     success: false,
                     message: "No image file uploaded",
