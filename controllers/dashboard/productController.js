@@ -45,7 +45,7 @@ class productController {
                 let allImageUrl = [];
 
                 for (let i = 0; i < images.length; i++) {
-                    const result = await cloudinary.uploader.upload(images[i].filepath, { folder: 'products', secure: true })
+                    const result = await cloudinary.uploader.upload(images[i].filepath, { folder: 'products' })
                     allImageUrl = [...allImageUrl, result.url]
                 }
 
@@ -142,7 +142,7 @@ class productController {
                         api_secret: process.env.api_secret,
                         secure: true
                     })
-                    const result = await cloudinary.uploader.upload(newImage.filepath, { folder: 'products', secure: true })
+                    const result = await cloudinary.uploader.upload(newImage.filepath, { folder: 'products' })
 
                     if (result) {
                         let { images } = await productModel.findById(productId)
