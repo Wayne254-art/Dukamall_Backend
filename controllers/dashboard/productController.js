@@ -7,9 +7,13 @@ class productController {
 
     add_product = async (req, res) => {
         const { id } = req;
-        const form = formidable({ multiples: true })
+        const form = new formidable.IncomingForm({ multiples: true })
 
         form.parse(req, async (err, field, files) => {
+            if (err) {
+                return responseReturn(res, 500, { error: "File parsing failed" });
+            }
+    
             let { name, category, description, stock, color, size, price, discount, shopName, brand } = field;
             const { images } = files;
             name = name.trim()
