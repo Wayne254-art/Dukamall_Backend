@@ -36,20 +36,22 @@ class productController {
 
             try {
 
-                if (typeof color === "string") {
-                    color = color ? [{ name: color.trim() }] : [];
-                } else if (Array.isArray(color)) {
-                    color = color.map(c => ({ name: c.trim() }));
-                } else {
-                    color = [];
+                let color = [];
+                if (field.color) {
+                    if (typeof field.color[0] === "string") {
+                        color = field.color[0] ? [{ name: field.color[0]?.trim() }] : [];
+                    } else if (Array.isArray(field.color)) {
+                        color = field.color.map(c => ({ name: c.trim() }));
+                    }
                 }
 
-                if (typeof size === "string") {
-                    size = size ? size.split(",").map(s => ({ value: s.trim() })) : [];
-                } else if (Array.isArray(size)) {
-                    size = size.map(s => ({ value: s.trim() }));
-                } else {
-                    size = [];
+                let size = [];
+                if (field.size) {
+                    if (typeof field.size[0] === "string") {
+                        size = field.size[0] ? field.size[0].split(",").map(s => ({ value: s.trim() })) : [];
+                    } else if (Array.isArray(field.size)) {
+                        size = field.size.map(s => ({ value: s.trim() }));
+                    }
                 }
 
                 // console.log("Parsed Color:", color);
