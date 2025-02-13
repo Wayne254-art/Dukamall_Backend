@@ -145,44 +145,67 @@ class productController {
     }
 
     product_image_update = async (req, res) => {
-        const form = formidable({ multiples: true })
+        const form = new formidable.IncomingForm({ multiples: false, keepExtensions: true });
 
-        form.parse(req, async (err, field, files) => {
-            const { productId, oldImage } = field;
-            const { newImage } = files
-
+        form.parse(req, async (err, fields, files) => {
             if (err) {
-                responseReturn(res, 404, { error: err.message })
-            } else {
-                try {
-                    cloudinary.config({
-                        cloud_name: process.env.cloud_name,
-                        api_key: process.env.api_key,
-                        api_secret: process.env.api_secret,
-                        secure: true
-                    })
-                    const result = await cloudinary.uploader.upload(newImage.filepath, { folder: 'products' })
-
-                    if (result) {
-                        let { images } = await productModel.findById(productId)
-                        const index = images.findIndex(img => img === oldImage)
-                        images[index] = result.url;
-
-                        await productModel.findByIdAndUpdate(productId, {
-                            images
-                        })
-
-                        const product = await productModel.findById(productId)
-                        responseReturn(res, 200, { product, message: 'product image updated successfully' })
-                    } else {
-                        responseReturn(res, 404, { error: 'image upload failed' })
-                    }
-                } catch (error) {
-                    responseReturn(res, 404, { error: error.message })
-                }
+                return responseReturn(res, 400, { error: 'Error parsing form data' });
             }
-        })
-    }
+
+            // console.log("Parsed fields:", fields);
+            // console.log("Parsed files:", files);
+
+            const productId = fields.productId?.[0] || fields.productId;
+            const oldImage = fields.oldImage?.[0] || fields.oldImage;
+            const newImage = files.newImage?.[0] || files.newImage; // Handle object/array formats
+
+            if (!productId || !oldImage || !newImage || !newImage.filepath) {
+                return responseReturn(res, 400, { error: 'Missing required fields or file' });
+            }
+
+            cloudinary.config({
+                cloud_name: process.env.cloud_name,
+                api_key: process.env.api_key,
+                api_secret: process.env.api_secret,
+                secure: true
+            });
+
+            try {
+                console.log("Uploading new image to Cloudinary:", newImage.filepath);
+
+                const result = await cloudinary.uploader.upload(newImage.filepath, { folder: 'products' });
+
+                if (!result?.secure_url) {
+                    return responseReturn(res, 400, { error: 'Image upload failed' });
+                }
+
+                const product = await productModel.findById(productId);
+
+                if (!product) {
+                    return responseReturn(res, 404, { error: 'Product not found' });
+                }
+
+                let { images } = product;
+                const index = images.findIndex(img => img === oldImage);
+
+                if (index === -1) {
+                    return responseReturn(res, 400, { error: 'Old image not found in product' });
+                }
+
+                images[index] = result.secure_url;
+
+                await productModel.findByIdAndUpdate(productId, { images });
+
+                const updatedProduct = await productModel.findById(productId);
+                return responseReturn(res, 200, { updatedProduct, message: 'Product image updated successfully' });
+
+            } catch (error) {
+                console.error("Error updating product image:", error);
+                return responseReturn(res, 500, { error: 'Internal server error' });
+            }
+        });
+    };
+
 
     get_seller_discounted_products = async (req, res) => {
         try {
