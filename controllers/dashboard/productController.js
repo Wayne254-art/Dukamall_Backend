@@ -13,8 +13,16 @@ class productController {
             if (err) {
                 return responseReturn(res, 500, { error: "File parsing failed" });
             }
-    
-            let { name, category, description, stock, color, size, price, discount, shopName, brand } = field;
+
+            let name = field.name ? field.name[0].trim() : "";
+            let category = field.category ? field.category[0].trim() : "";
+            let description = field.description ? field.description[0].trim() : "";
+            let stock = field.stock ? parseInt(field.stock[0]) : 0;
+            let price = field.price ? parseInt(field.price[0]) : 0;
+            let discount = field.discount ? parseInt(field.discount[0]) : 0;
+            let shopName = field.shopName ? field.shopName[0].trim() : "";
+            let brand = field.brand ? field.brand[0].trim() : "";
+
             const { images } = files;
             name = name.trim()
             const slug = name.split(' ').join('-')
@@ -35,7 +43,7 @@ class productController {
                 } else {
                     color = [];
                 }
-                
+
                 if (typeof size === "string") {
                     size = size ? size.split(",").map(s => ({ value: s.trim() })) : [];
                 } else if (Array.isArray(size)) {
@@ -43,7 +51,7 @@ class productController {
                 } else {
                     size = [];
                 }
-    
+
                 // console.log("Parsed Color:", color);
                 // console.log("Parsed Size:", size);
                 let allImageUrl = [];
