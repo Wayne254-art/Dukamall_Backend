@@ -206,7 +206,6 @@ class productController {
         });
     };
 
-
     get_seller_discounted_products = async (req, res) => {
         try {
             const { sellerId } = req.params;
