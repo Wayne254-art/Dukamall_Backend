@@ -34,6 +34,7 @@
     "moment": "^2.29.4",
     "mongoose": "^8.10.0",
     "morgan": "^1.10.0",
+    "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
     "paystack": "^2.0.1",
     "paystack-sdk": "^2.5.17",

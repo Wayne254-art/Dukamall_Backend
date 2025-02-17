@@ -3,6 +3,8 @@ const { responseReturn } = require('../../utiles/response')
 const { createToken } = require('../../utiles/tokenCreate')
 const sellerCustomerModel = require('../../models/chat/sellerCustomerModel')
 const bcrypt = require('bcrypt')
+const { send_OTP_email } = require('../../utiles/mailService')
+const cron = require("node-cron")
 
 class customerAuthController {
     customer_register = async (req, res) => {
@@ -87,6 +89,78 @@ class customerAuthController {
         })
         responseReturn(res, 200, { message: 'Logout successful' })
     }
+
+    request_password_reset = async (req, res) => {
+        const { email } = req.body;
+
+        try {
+            const user = await customerModel.findOne({ email });
+            if (!user) {
+                return responseReturn(res, 404, { message: 'Invalid user' })
+            }
+
+            const otp = Math.floor(100000 + Math.random() * 900000)
+            user.resetOTP = otp;
+            user.resetOTPExpires = Date.now() + 10 * 60 * 1000
+
+            await user.save()
+            await send_OTP_email(email, otp)
+
+            responseReturn(res, 200, { message: 'OTP sent to email' })
+        } catch (error) {
+            console.error("Error in request_password_reset:", error)
+            res.status(500).json({ message: "Internal server error" })
+        }
+    }
+
+    verify_OTP = async (req, res) => {
+        const { email, otp } = req.body;
+        try {
+            const user = await customerModel.findOne({ email });
+            if (!user || user.resetOTP !== parseInt(otp) || user.resetOTPExpires < Date.now()) {
+                return res.status(400).json({ message: "Invalid or expired OTP" });
+            }
+            res.json({ message: "OTP verified successfully" });
+        } catch (error) {
+            res.status(500).json({ message: "Internal server error" });
+        }
+    };
+
+    reset_password = async (req, res) => {
+        const { email, newPassword } = req.body;
+        try {
+            const user = await customerModel.findOne({ email });
+            if (!user) return res.status(404).json({ message: "User not found" });
+
+            user.password = await bcrypt.hash(newPassword, 10);
+            user.resetOTP = null;
+            user.resetOTPExpires = null;
+            await user.save();
+
+            res.json({ message: "Password reset successfully" });
+        } catch (error) {
+            console.log('error:', error)
+            res.status(500).json({ message: "Internal server error" });
+        }
+    };
+
 }
+
+// 🔄 **Cron Job: Clear expired OTPs every 5 minutes**
+cron.schedule("*/5 * * * *", async () => {
+    try {
+        const expiredOTPs = await customerModel.find({ resetOTPExpires: { $lt: Date.now() } });
+
+        if (expiredOTPs.length > 0) {
+            await customerModel.updateMany(
+                { resetOTPExpires: { $lt: Date.now() } },
+                { $set: { resetOTP: null, resetOTPExpires: null } }
+            );
+            console.log(`✅ Cleared ${expiredOTPs.length} expired OTPs.`);
+        }
+    } catch (error) {
+        console.error("❌ Error clearing expired OTPs:", error);
+    }
+});
 
 module.exports = new customerAuthController()

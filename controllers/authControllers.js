@@ -169,7 +169,6 @@ class authControllers {
         });
     };
 
-
     profile_info_add = async (req, res) => {
         const { county, constituency, ward, street_no, shopName, phoneNumber, building_name } = req.body;
         const { id } = req;
@@ -227,5 +226,6 @@ class authControllers {
             responseReturn(res, 500, { error: error.message })
         }
     }
+    
 }
 module.exports = new authControllers()

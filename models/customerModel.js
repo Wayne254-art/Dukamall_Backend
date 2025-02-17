@@ -14,6 +14,14 @@ const customerSchema = new Schema({
         required: true,
         select: false
     },
+    resetOTP: {
+        type: Number,
+        default: null,
+    },
+    resetOTPExpires: {
+        type: Date,
+        default: null,
+    },
     method: {
         type: String,
         required: true,
