@@ -7,6 +7,7 @@ const customer = require("../../models/customerModel");
 const cartModel = require("../../models/cartModel");
 const myShopWallet = require("../../models/myShopWallet");
 const sellerWallet = require("../../models/sellerWallet");
+const productModel = require("../../models/productModel")
 
 const { mongo: { ObjectId }, } = require("mongoose");
 const { responseReturn } = require("../../utiles/response");
@@ -51,6 +52,15 @@ class orderController {
                 customerOrderProduct.push(tempCusPro);
                 if (pro[j]._id) {
                     cartId.push(pro[j]._id);
+                }
+
+                const product = await productModel.findById(tempCusPro._id);
+                if (product) {
+                    if (product.stock < tempCusPro.quantity) {
+                        return res.status(400).json({ message: "Not enough stock available" });
+                    }
+                    product.stock -= tempCusPro.quantity;
+                    await product.save();
                 }
             }
         }
@@ -162,7 +172,7 @@ class orderController {
             console.log(error.message);
         }
     };
-    
+
     get_order = async (req, res) => {
         const { orderId } = req.params;
 
@@ -321,7 +331,7 @@ class orderController {
 
     create_payment = async (req, res) => {
         try {
-            const { price, email,orderId } = req.body;
+            const { price, email, orderId } = req.body;
 
             if (!price || !email || !orderId) {
                 return res.status(400).json({ message: 'Price and email are required' });
@@ -333,8 +343,8 @@ class orderController {
                 currency: "KES",
                 callback_url: `${process.env.FRONTEND_URL}/payment/success`,
                 metadata: {
-                order_id: orderId,
-            },
+                    order_id: orderId,
+                },
             });
 
             return res.status(200).json({
@@ -370,7 +380,7 @@ class orderController {
 
             if (paymentData.status === 'success') {
                 // Handle successful payment (e.g., update order status)
-                res.json({ status: 'success',orderId: orderId, message: 'Payment verified successfully' });
+                res.json({ status: 'success', orderId: orderId, message: 'Payment verified successfully' });
             } else if (paymentData.status === 'abandoned' || paymentData.status === 'failed') {
                 // Handle failed or abandoned payments
                 res.json({ status: 'failed', message: 'Payment verification failed' });
@@ -388,85 +398,85 @@ class orderController {
     };
 
     order_confirm = async (req, res) => {
-    const { orderId } = req.params;
-    const { reference } = req.body;
+        const { orderId } = req.params;
+        const { reference } = req.body;
 
-    // console.log('Request Body:', req.body);
-    // console.log('Reference:', reference);
+        // console.log('Request Body:', req.body);
+        // console.log('Reference:', reference);
 
-    if (!reference) {
-        return responseReturn(res, 400, { error: "Reference is required." });
-    }
+        if (!reference) {
+            return responseReturn(res, 400, { error: "Reference is required." });
+        }
 
-    try {
-        // Verify payment with Paystack
-        const paystackResponse = await axios.get(
-            `https://api.paystack.co/transaction/verify/${reference}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        try {
+            // Verify payment with Paystack
+            const paystackResponse = await axios.get(
+                `https://api.paystack.co/transaction/verify/${reference}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                    },
+                }
+            );
+
+            // console.log('Paystack Response:', paystackResponse.data);
+
+            if (!paystackResponse.data.status || paystackResponse.data.data.status !== 'success') {
+                return responseReturn(res, 400, { error: 'Payment verification failed.' });
+            }
+
+            // Update customer order
+            const updatedOrder = await customerOrder.findByIdAndUpdate(
+                orderId,
+                {
+                    payment_status: "paid",
+                    delivery_status: "pending",
                 },
+                { new: true }
+            );
+
+            if (!updatedOrder) {
+                console.error(`No order found with ID: ${orderId}`);
+                return responseReturn(res, 404, { error: "Order not found." });
             }
-        );
 
-        // console.log('Paystack Response:', paystackResponse.data);
+            // Update auth orders
+            const updatedAuthOrders = await authOrderModel.updateMany(
+                { orderId: new ObjectId(orderId) },
+                {
+                    payment_status: "paid",
+                    delivery_status: "pending",
+                }
+            );
 
-        if (!paystackResponse.data.status || paystackResponse.data.data.status !== 'success') {
-            return responseReturn(res, 400, { error: 'Payment verification failed.' });
-        }
+            console.log('Auth Orders Updated:', updatedAuthOrders.matchedCount);
 
-        // Update customer order
-        const updatedOrder = await customerOrder.findByIdAndUpdate(
-            orderId,
-            {
-                payment_status: "paid",
-                delivery_status: "pending",
-            },
-            { new: true }
-        );
+            // Wallet creation
+            const time = moment(Date.now()).format("l");
+            const splitTime = time.split("/");
 
-        if (!updatedOrder) {
-            console.error(`No order found with ID: ${orderId}`);
-            return responseReturn(res, 404, { error: "Order not found." });
-        }
-
-        // Update auth orders
-        const updatedAuthOrders = await authOrderModel.updateMany(
-            { orderId: new ObjectId(orderId) },
-            {
-                payment_status: "paid",
-                delivery_status: "pending",
-            }
-        );
-
-        console.log('Auth Orders Updated:', updatedAuthOrders.matchedCount);
-
-        // Wallet creation
-        const time = moment(Date.now()).format("l");
-        const splitTime = time.split("/");
-
-        await myShopWallet.create({
-            amount: updatedOrder.price,
-            manth: splitTime[0],
-            year: splitTime[2],
-        });
-
-        const auOrder = await authOrderModel.find({ orderId: new ObjectId(orderId) });
-        for (const order of auOrder) {
-            await sellerWallet.create({
-                sellerId: order.sellerId.toString(),
-                amount: order.price,
+            await myShopWallet.create({
+                amount: updatedOrder.price,
                 manth: splitTime[0],
                 year: splitTime[2],
             });
-        }
 
-        responseReturn(res, 200, { message: "Order confirmed successfully." });
-    } catch (error) {
-        console.error("Error confirming order:", error.response?.data || error.message);
-        responseReturn(res, 500, { message: "Internal server error." });
-    }
-};
+            const auOrder = await authOrderModel.find({ orderId: new ObjectId(orderId) });
+            for (const order of auOrder) {
+                await sellerWallet.create({
+                    sellerId: order.sellerId.toString(),
+                    amount: order.price,
+                    manth: splitTime[0],
+                    year: splitTime[2],
+                });
+            }
+
+            responseReturn(res, 200, { message: "Order confirmed successfully." });
+        } catch (error) {
+            console.error("Error confirming order:", error.response?.data || error.message);
+            responseReturn(res, 500, { message: "Internal server error." });
+        }
+    };
 
 }
 
