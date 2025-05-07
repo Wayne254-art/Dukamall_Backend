@@ -166,6 +166,8 @@ app.use('/api', require('./routes/dashboard/productRoutes'))
 app.use('/api', require('./routes/helpCenter'))
 app.use('/api', require('./routes/subscriptionRoute'))
 app.use('/api', require('./routes/commentRoutes'))
+app.use('/api', require('./routes/installmentRoutes'))
+app.use('/api', require('./routes/mpesaRoutes'))
 
 app.get('/', (req, res) => res.send('Hello World!'))
 const port = process.env.PORT

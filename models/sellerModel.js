@@ -30,6 +30,14 @@ const sellerSchema = new Schema({
         type: String,
         required: true,
     },
+    resetOTP: {
+        type: Number,
+        default: null,
+    },
+    resetOTPExpires: {
+        type: Date,
+        default: null,
+    },
     image: {
         type: String,
         default: ''

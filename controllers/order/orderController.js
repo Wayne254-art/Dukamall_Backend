@@ -3,7 +3,6 @@ const axios = require('axios');
 const moment = require("moment");
 const authOrderModel = require("../../models/authOrder");
 const customerOrder = require("../../models/customerOrder");
-const customer = require("../../models/customerModel");
 const cartModel = require("../../models/cartModel");
 const myShopWallet = require("../../models/myShopWallet");
 const sellerWallet = require("../../models/sellerWallet");
